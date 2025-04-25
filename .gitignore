@@ -1,0 +1,22 @@
+# Java
+*.class
+*.jar
+*.war
+target/
+
+# Logs
+*.log
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Node (for frontend)
+node_modules/
+dist/
+
+# Docker
+.env
