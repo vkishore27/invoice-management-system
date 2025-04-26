@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import org.vk.invoice.backend.entity.Invoice;
 import org.vk.invoice.backend.repository.InvoiceRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class InvoiceService {
 
@@ -19,5 +22,18 @@ public class InvoiceService {
         return invoiceRepository.findById(id).orElse(null);
     }
 
+    public List<Invoice> getAllInvoices() {
+        return invoiceRepository.findAll();
+    }
+
     // Edit API will be added soon
+    public Optional<Invoice> updateInvoice(Long id, Invoice updatedInvoice) {
+        return invoiceRepository.findById(id).map(existing -> {
+            existing.setCustomerName(updatedInvoice.getCustomerName());
+            existing.setInvoiceDate(updatedInvoice.getInvoiceDate());
+            existing.setTotalAmount(updatedInvoice.getTotalAmount());
+            existing.setStatus(updatedInvoice.getStatus());
+            return invoiceRepository.save(existing);
+        });
+    }
 }

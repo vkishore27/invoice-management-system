@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Invoice</title>
+  <link rel="stylesheet" href="edit.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Edit Invoice</h1>
+
+    <label for="invoiceId">Enter Invoice ID:</label>
+    <input type="number" id="invoiceId" />
+    <button onclick="fetchInvoice()">Load Invoice</button>
+
+    <!-- <a href="print-invoice.html?id=5">
+        <button>🖨️ Print Invoice</button>
+    </a> -->
+
+    <form id="editForm" style="display:none;">
+      <label for="customerName">Customer Name:</label>
+      <input type="text" id="customerName" required />
+
+      <label for="invoiceDate">Invoice Date:</label>
+      <input type="date" id="invoiceDate" required />
+
+      <label for="totalAmount">Total Amount:</label>
+      <input type="number" id="totalAmount" required />
+
+      <label for="status">Status:</label>
+      <select id="status">
+        <option value="DUE">DUE</option>
+        <option value="PAID">PAID</option>
+      </select>
+
+      <button type="submit">Update Invoice</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script src="edit.js"></script>
+</body>
+</html>
