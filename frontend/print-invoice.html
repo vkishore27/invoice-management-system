@@ -1,38 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>Print Invoice</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 40px;
     }
+
     .invoice-box {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       padding: 30px;
       border: 1px solid #eee;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
     }
+
     .invoice-header {
       text-align: center;
-      margin-bottom: 20px;
+      font-size: 22px;
+      font-weight: bold;
     }
-    .invoice-info {
-      margin-bottom: 20px;
-    }
-    .invoice-info div {
-      margin: 5px 0;
-    }
-    .print-btn {
+
+    .section {
       margin-top: 20px;
-      display: block;
+    }
+
+    .section h3 {
+      margin-bottom: 5px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      border: 1px solid #aaa;
+      padding: 8px;
       text-align: center;
     }
-    .no-print {
-      display: block;
+
+    .totals td {
+      text-align: right;
     }
+
+    .print-button {
+      text-align: center;
+      margin-top: 20px;
+    }
+
     @media print {
-      .no-print {
+      .print-button {
         display: none;
       }
     }
@@ -40,36 +61,99 @@
 </head>
 <body>
   <div class="invoice-box">
-    <div class="invoice-header">
-      <h2>Invoice</h2>
+    <div class="invoice-header">GULJARI TEXTILES</div>
+    <div class="section" id="buyer-info"></div>
+    <div class="section" id="invoice-info"></div>
+    <div class="section">
+      <h3>Items</h3>
+      <table id="item-table">
+        <thead>
+          <tr>
+            <th>Particulars</th>
+            <th>HSN Code</th>
+            <th>Challan No</th>
+            <th>Unit</th>
+            <th>Rate</th>
+            <th>Qty</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <div class="invoice-info" id="invoice-info">
-      <!-- Invoice data will load here -->
-    </div>
-
-    <div class="print-btn no-print">
-      <button onclick="window.print()">🖨️ Print Invoice</button>
-    </div>
+    <div class="section" id="totals"></div>
+    <div class="section" id="footer-notes"></div>
   </div>
 
-  <a href="http://localhost:8080/api/invoices/{{invoiceId}}/pdf" download="invoice-{{invoiceId}}.pdf">
-    <button>🖨️ Download PDF</button>
-  </a>
+  <div class="print-button">
+    <button onclick="window.print()">🖨️ Print Invoice</button>
+  </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const invoiceId = params.get("id");
+    const id = params.get("id");
 
-    fetch(`http://localhost:8080/api/invoices/${invoiceId}`)
-      .then(response => response.json())
+    fetch(`http://localhost:8080/api/invoices/${id}`)
+      .then(res => res.json())
       .then(invoice => {
-        const infoDiv = document.getElementById("invoice-info");
-        infoDiv.innerHTML = `
-          <div><strong>Invoice ID:</strong> ${invoice.id}</div>
-          <div><strong>Customer Name:</strong> ${invoice.customerName}</div>
-          <div><strong>Date:</strong> ${invoice.invoiceDate}</div>
-          <div><strong>Status:</strong> ${invoice.status}</div>
-          <div><strong>Total:</strong> ₹${invoice.totalAmount}</div>
+        // Buyer Info
+        document.getElementById("buyer-info").innerHTML = `
+          <h3>Buyer Details</h3>
+          <p><strong>Name:</strong> ${invoice.customerName}</p>
+          <p><strong>Address:</strong> ${invoice.customerAddress}</p>
+          <p><strong>Mobile:</strong> ${invoice.mobile}</p>
+          <p><strong>GSTIN:</strong> ${invoice.gstin}</p>
+        `;
+
+        // Invoice Info
+        document.getElementById("invoice-info").innerHTML = `
+          <h3>Invoice Info</h3>
+          <p><strong>Invoice No:</strong> ${invoice.invoiceNo}</p>
+          <p><strong>Date:</strong> ${invoice.invoiceDate}</p>
+          <p><strong>Transport:</strong> ${invoice.transport}</p>
+          <p><strong>LR No:</strong> ${invoice.lrNo}</p>
+          <p><strong>Bale No:</strong> ${invoice.baleNo}</p>
+          <p><strong>Destination:</strong> ${invoice.destination}</p>
+        `;
+
+        // Items Table
+        const tableBody = document.querySelector("#item-table tbody");
+        invoice.items.forEach(item => {
+          const row = `
+            <tr>
+              <td>${item.particulars}</td>
+              <td>${item.hsnCode}</td>
+              <td>${item.challanNo}</td>
+              <td>${item.unit}</td>
+              <td>${item.rate}</td>
+              <td>${item.quantity}</td>
+              <td>${item.amount}</td>
+            </tr>
+          `;
+          tableBody.innerHTML += row;
+        });
+
+        // Totals
+        document.getElementById("totals").innerHTML = `
+          <h3>Totals</h3>
+          <p><strong>Taxable Amount:</strong> ₹${invoice.taxableAmount}</p>
+          <p><strong>CGST:</strong> ₹${invoice.cgstAmount}</p>
+          <p><strong>SGST:</strong> ₹${invoice.sgstAmount}</p>
+          <p><strong>IGST:</strong> ₹${invoice.igstAmount}</p>
+          <p><strong>Total Tax:</strong> ₹${invoice.totalTax}</p>
+          <p><strong>Round Off:</strong> ₹${invoice.roundOff}</p>
+          <p><strong>Invoice Total:</strong> ₹${invoice.invoiceTotal}</p>
+          <p><strong>Total in Words:</strong> ${invoice.invoiceTotalInWords}</p>
+        `;
+
+        // Footer
+        document.getElementById("footer-notes").innerHTML = `
+          <h3>Bank Details</h3>
+          <p><strong>Bank:</strong> ${invoice.bankName}</p>
+          <p><strong>Account No:</strong> ${invoice.accountNo}</p>
+          <p><strong>IFSC:</strong> ${invoice.ifscCode}</p>
+          <br>
+          <p><em>Thank you for your business!</em></p>
         `;
       });
   </script>

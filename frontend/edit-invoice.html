@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Invoice</title>
+  <style>
+    /* Add your existing styles here */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Edit Invoice</h1>
+
+    <!-- Enter Invoice ID to Load -->
+    <label for="invoiceId">Enter Invoice ID:</label>
+    <input type="number" id="invoiceId" />
+    <button onclick="fetchInvoice()">Load Invoice</button>
+
+    <form id="editForm" style="display:none;">
+      
+      <!-- Buyer Info -->
+      <h3>Buyer Details</h3>
+      <input type="text" id="customerName" placeholder="Customer Name" required>
+      <input type="text" id="customerAddress" placeholder="Customer Address" required>
+      <input type="text" id="mobile" placeholder="Mobile" required>
+      <input type="text" id="gstin" placeholder="GSTIN" required>
+
+      <!-- Invoice Info -->
+      <h3>Invoice Info</h3>
+      <input type="text" id="invoiceNo" placeholder="Invoice No" required>
+      <input type="date" id="invoiceDate" required>
+      <input type="text" id="transport" placeholder="Transport">
+      <input type="text" id="lrNo" placeholder="LR No">
+      <input type="text" id="baleNo" placeholder="Bale No">
+      <input type="text" id="destination" placeholder="Destination">
+
+      <!-- Bank Details -->
+      <h3>Bank Details</h3>
+      <input type="text" id="bankName" placeholder="Bank Name">
+      <input type="text" id="accountNo" placeholder="Account No">
+      <input type="text" id="ifscCode" placeholder="IFSC Code">
+
+      <!-- Amount Info -->
+      <h3>Amount Details</h3>
+      <input type="number" id="taxableAmount" placeholder="Taxable Amount">
+      <input type="number" id="cgstAmount" placeholder="CGST">
+      <input type="number" id="sgstAmount" placeholder="SGST">
+      <input type="number" id="igstAmount" placeholder="IGST">
+      <input type="number" id="totalTax" placeholder="Total Tax">
+      <input type="number" id="roundOff" placeholder="Round Off">
+      <input type="number" id="invoiceTotal" placeholder="Invoice Total">
+      <input type="text" id="invoiceTotalInWords" placeholder="Invoice Total in Words">
+      
+      <select id="status">
+        <option value="DUE">DUE</option>
+        <option value="PAID">PAID</option>
+      </select>
+
+      <!-- Line Items Section -->
+      <h3>Items</h3>
+      <div id="items"></div>
+      <button type="button" onclick="addItem()">+ Add Item</button>
+
+      <br><br>
+      <button type="submit">Update Invoice</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script src="edit-invoice.js"></script> <!-- We will create this JS next -->
+</body>
+</html>

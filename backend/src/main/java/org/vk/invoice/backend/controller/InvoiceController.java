@@ -2,8 +2,10 @@ package org.vk.invoice.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.vk.invoice.backend.dto.InvoiceRequest;
 import org.vk.invoice.backend.entity.Invoice;
 import org.vk.invoice.backend.service.InvoicePdfService;
 import org.vk.invoice.backend.service.InvoiceService;
@@ -22,46 +24,62 @@ public class InvoiceController {
     @Autowired
     private InvoicePdfService invoicePdfService;
 
+    // Create new Invoice
     @PostMapping
-    public Invoice createInvoice(@RequestBody Invoice invoice) {
-        return invoiceService.createInvoice(invoice);
+    public ResponseEntity<Invoice> createInvoice(@RequestBody InvoiceRequest request) {
+        Invoice createdInvoice = invoiceService.createInvoice(request);
+        return ResponseEntity.ok(createdInvoice);
     }
 
+    // Get Invoice by ID
     @GetMapping("/{id}")
-    public Invoice getInvoiceById(@PathVariable Long id) {
-        return invoiceService.getInvoiceById(id);
+    public ResponseEntity<Invoice> getInvoiceById(@PathVariable Long id) {
+        Optional<Invoice> invoiceOptional = invoiceService.getInvoiceById(id);
+        return invoiceOptional.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+//    @PutMapping("/{id}")
+//    public ResponseEntity<Invoice> updateInvoice(@PathVariable Long id, @RequestBody Invoice invoice) {
+//        return invoiceService.updateInvoice(id, invoice)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Invoice> updateInvoice(@PathVariable Long id, @RequestBody Invoice invoice) {
-        return invoiceService.updateInvoice(id, invoice)
+    public ResponseEntity<Invoice> updateInvoice(@PathVariable Long id, @RequestBody InvoiceRequest request) {
+        return invoiceService.updateInvoice(id, request)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
     @GetMapping
     public List<Invoice> getAllInvoices() {
         return invoiceService.getAllInvoices();
     }
 
-    @GetMapping("/api/invoices/{id}/pdf")
-    public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) throws Exception {
-        // Get invoice by ID
-        Invoice invoice = invoiceService.getInvoiceById(id);
-        if (invoice == null) {
-            return ResponseEntity.notFound().build();
+    // --- New PDF Download API ---
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long id) {
+        try {
+            Optional<Invoice> optionalInvoice = invoiceService.getInvoiceById(id);
+            if (optionalInvoice.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Invoice invoice = optionalInvoice.get();
+            byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoice);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice-" + invoice.getInvoiceNo() + ".pdf")
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
-
-        // Generate PDF for the invoice
-        byte[] pdfContent = invoicePdfService.generateInvoicePdf(invoice);
-
-        // Return PDF file as response
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=invoice-" + invoice.getId() + ".pdf");
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(pdfContent);
     }
 
 //    @PutMapping("/{id}")
